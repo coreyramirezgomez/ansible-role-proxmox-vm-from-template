@@ -1,11 +1,11 @@
 ---
 # tasks file for coreyramirezgomez.proxmox_vm_from_template
-- name: Include requirements tasks
-  include_tasks: "requirements.yml"
 - name: Include assertions
   include_tasks: "assertions.yml"
 - name: Include facts tasks
   include_tasks: "facts.yml"
+- name: Include requirements tasks
+  include_tasks: "requirements.yml"
 - name: Include VM Tasks
   include_tasks: "vm.yml"
 - name: Include Cloud-Init Tasks

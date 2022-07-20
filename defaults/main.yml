@@ -1,5 +1,5 @@
 ---
-### Required with defaults
+### Execution vars; required (with defaults)
 # 2 ways to deploy a VM from template:
 # proxmox_vm_from_template_meta_host: false
 #   sets delegate_to: {{ inventory_hostname }} -- which should be the proxmox host (this is the default behavior of all ansible runs)
@@ -26,36 +26,36 @@ proxmox_vm_from_template_state: "present"
 proxmox_vm_from_template_startup: false
 # Format the template disk should be in: raw, qcow2
 proxmox_vm_from_template_format: "raw"
-### Required
-# proxmox_vm_from_template_api_token_id: "TOKEN_ID"
-# proxmox_vm_from_template_api_token_secret: "MUCH_SECRET"
-# proxmox_vm_from_template_api_user: "root@pam"
-# proxmox_vm_from_template_root_user_password: "root-password"
-# proxmox_vm_from_template_target_host: "proxmox.example.com"
-# proxmox_vm_from_template_target_node: "proxmox"
 
+### API vars; required (with defaults)
+proxmox_vm_from_template_target_host: "{{ inventory_hostname }}"
+proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
+### API vars; required
+# proxmox_vm_from_template_root_user_password: ""
+# proxmox_vm_from_template_api_token_id: ""
+# proxmox_vm_from_template_api_token_secret: ""
+# proxmox_vm_from_template_api_user: "root@pam"
+
+### Template handling vars; required
 # proxmox_vm_from_template_dest_id: "100"
 # proxmox_vm_from_template_dest_name: "vm-name"
 # proxmox_vm_from_template_src_id: "101"
 # proxmox_vm_from_template_src_name: "template-name"
 # proxmox_vm_from_template_storage: "local-lvm"
 
-### Optional
+### New VM modification vars; optional
 # Update the VM with new specs after clone:
 # proxmox_vm_from_template_update:
 #   cores: 4
 #   sockets: 1
 #   memory: 4096
-
 # Increase (only) primary disk size:
 # proxmox_vm_from_template_main_disk_size: "20G"
-
 # Update storage - uses qm utility
 # proxmox_vm_from_template_disks:
 #   "scsi1":
 #     size: "32"
 #     storage: "local-lvm"
-
 # Update networking - uses qm utility
 # proxmox_vm_from_template_networks:
 #   "net0":
@@ -65,6 +65,7 @@ proxmox_vm_from_template_format: "raw"
 #     macaddr: "70:55:7F:83:2D:B1"
 #     tag: "10"
 
+### cloud-init handling vars; optional
 # proxmox_vm_from_template_ci_user_data_file_path: "/var/lib/vz/snippets/"
 # proxmox_vm_from_template_ci_user_data_file_name: "{{ inventory_hostname_short }}-user-data"
 # proxmox_vm_from_template_ci_user_data_volume: "local-lvm"

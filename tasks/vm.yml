@@ -14,7 +14,7 @@
         state: "{{ proxmox_vm_from_template_state }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
     - name: Update VM (with proxmoxer api)
-      proxmox_kvm: "{{ proxmox_vm_from_template_update }}"
+      proxmox_kvm: "{{ proxmox_vm_from_template_update_super_fact }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when: proxmox_vm_from_template_update is defined
     - name: Gather VM Facts (with qm utility)

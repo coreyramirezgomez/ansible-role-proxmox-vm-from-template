@@ -2,70 +2,12 @@
   set_fact:
     proxmox_vm_from_template_delegate: "{{ proxmox_vm_from_template_target_host }}"
   when: proxmox_vm_from_template_meta_host
-- name: Set required facts for proxmox_vm_from_template_update
-  block:
-    - name: "Include api_token_id into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.api_token_id is not defined
-      with_items:
-        - {
-            "key": "api_token_id",
-            "value": "{{ proxmox_vm_from_template_api_token_id }}",
-          }
-    - name: "Include api_token_secret into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.api_token_secret is not defined
-      with_items:
-        - {
-            "key": "api_token_secret",
-            "value": "{{ proxmox_vm_from_template_api_token_secret }}",
-          }
-    - name: "Include api_user into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.api_user is not defined
-      with_items:
-        - {
-            "key": "api_user",
-            "value": "{{ proxmox_vm_from_template_api_user }}",
-          }
-    - name: "Include vmid into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.vmid is not defined
-      with_items:
-        - { "key": "vmid", "value": "{{ proxmox_vm_from_template_dest_id }}" }
-    - name: "Include name into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.name is not defined
-      with_items:
-        - { "key": "name", "value": "{{ proxmox_vm_from_template_dest_name }}" }
-    - name: "Include api_host into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.api_host is not defined
-      with_items:
-        - {
-            "key": "api_host",
-            "value": "{{ proxmox_vm_from_template_target_host }}",
-          }
-    - name: "Include node into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.node is not defined
-      with_items:
-        - {
-            "key": "node",
-            "value": "{{ proxmox_vm_from_template_target_node }}",
-          }
-    - name: "Include update into proxmox_vm_from_template_update"
-      set_fact:
-        proxmox_vm_from_template_update: "{{ proxmox_vm_from_template_update | combine({item.key: item.value}) }}"
-      when: proxmox_vm_from_template_update.update is not defined
-      with_items:
-        - { "key": "update", "value": true }
+- name: "Construct proxmox_vm_from_template_update_super_fact"
+  set_fact:
+    proxmox_vm_from_template_update_super_fact: |
+      {% if item.key not in proxmox_vm_from_template_update_super_fact %}
+      {{ proxmox_vm_from_template_update_super_fact | combine({item.key: item.value}) }}
+      {% endif %}
+  with_items: "{{ proxmox_vm_from_template_update | dict2items }}"
   when:
     - proxmox_vm_from_template_update is defined
