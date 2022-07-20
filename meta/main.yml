@@ -1,0 +1,22 @@
+---
+dependencies: []
+galaxy_info:
+  author: Corey Ramirez-Gomez
+  role_name: proxmox_vm_from_template
+  description: Ansible task sequence to create Proxmox Virtual Machine from an existing template.
+  license: MIT
+  min_ansible_version: 2.1
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - buster
+  galaxy_tags:
+    - proxmox
+    - virtual_machines
+    - virtualmachine
+    - vm
+    - template
+    - cloudimage
+    - cloudinit
+    - orchestration

@@ -1,0 +1,117 @@
+- block:
+    - name: Create VM From Template (with proxmoxer api)
+      proxmox_kvm:
+        api_user: "root@pam"
+        api_password: "{{ proxmox_vm_from_template_root_user_password }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        clone: "{{ proxmox_vm_from_template_src_name }}"
+        vmid: "{{ proxmox_vm_from_template_src_id }}"
+        newid: "{{ proxmox_vm_from_template_dest_id }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        storage: "{{ proxmox_vm_from_template_storage }}"
+        format: "{{ proxmox_vm_from_template_format }}"
+        state: "{{ proxmox_vm_from_template_state }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Update VM (with proxmoxer api)
+      proxmox_kvm: "{{ proxmox_vm_from_template_update }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      when: proxmox_vm_from_template_update is defined
+    - name: Gather VM Facts (with qm utility)
+      block:
+        - name: "qm config {{ proxmox_vm_from_template_dest_id }}"
+          command: "qm config {{ proxmox_vm_from_template_dest_id }}"
+          register: config
+          delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+        - name: "Construct vm_info fact"
+          set_fact:
+            vm_info: |
+              {% set info = {} %}
+              {% set lines = config.stdout | split('\n') %}
+              {% for line in lines %}
+              {% set key = line.split(':')[0] %}
+              {% set val = line.split(':')[1:] | join(':') %}
+              {% set _ = info.update({key:val}) %}
+              {% endfor %}
+              {{ info }}
+        - name: "Debug vm_info"
+          debug:
+            msg: |
+              vm_info: {{ vm_info }}
+              type: {{ vm_info | type_debug }}
+              length: {{ vm_info | length }}
+              keys: {{ vm_info.keys() | list }}
+            verbosity: 1
+    - name: Increase main disk size (with qm utility)
+      command: "qm resize {{ proxmox_vm_from_template_dest_id }} scsi0 {{ proxmox_vm_from_template_main_disk_size }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Update VM storage (with qm utility)
+      command: |
+        {% if item.key not in vm_info %}
+        qm set {{ proxmox_vm_from_template_dest_id }} -{{ item.key }} \
+        '{{ item.value.storage }}:{{ item.value.size }}'
+        {% else %}
+        echo "{{ item.key }} already exists. Skipping."
+        {% endif %}
+      when: proxmox_vm_from_template_disks is defined
+      with_dict: "{{ proxmox_vm_from_template_disks }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      register: update_vm_storage
+      changed_when: "'already exists. Skipping.' not in update_vm_storage.stdout"
+    - name: Update VM networking (with qm utility)
+      command: |
+        qm set {{ proxmox_vm_from_template_dest_id }} -{{ item.key }} \
+        '{{ item.value.model | default('virtio', true) }},bridge={{ item.value.bridge | default('vmbr0', true) }},firewall={{ item.value.firewall | default('0') }}{% if item.value.macaddr is defined %},macaddr={{ item.value.macaddr }}{% endif %}{% if item.value.tag is defined %},tag={{ item.value.tag }}{% endif %}'
+      when: proxmox_vm_from_template_networks is defined
+      with_dict: "{{ proxmox_vm_from_template_networks }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+  when: proxmox_vm_from_template_state == 'present'
+- block:
+    - name: Start VM (with proxmoxer api)
+      proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        vmid: "{{ proxmox_vm_from_template_dest_id }}"
+        state: started
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Wait for VM startup
+      wait_for_connection:
+        timeout: 60
+      register: waitfor
+    - name: "Debug wait_for results"
+      debug:
+        msg: "wait_for results: {{ waitfor }}"
+        verbosity: 1
+  when:
+    - proxmox_vm_from_template_state == 'present'
+    - proxmox_vm_from_template_startup
+- block:
+    - name: Stop VM
+      proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        vmid: "{{ proxmox_vm_from_template_dest_id }}"
+        state: stopped
+        force: true
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Delete VM
+      proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        vmid: "{{ proxmox_vm_from_template_dest_id }}"
+        state: "absent"
+        force: true
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+  when: proxmox_vm_from_template_state == 'absent'

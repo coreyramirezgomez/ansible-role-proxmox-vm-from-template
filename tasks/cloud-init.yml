@@ -1,0 +1,44 @@
+- name: Remove Cloud-Init custom userdata
+  block:
+    - file:
+        state: absent
+        path: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+  when:
+    - proxmox_vm_from_template_state == 'absent'
+- name: Deploy Cloud-Init custom userdata
+  block:
+    - name: Create cloud-init custom userdata file (inline content)
+      copy:
+        dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
+        content: "{{ proxmox_vm_from_template_ci_user_data_content }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      when:
+        - proxmox_vm_from_template_ci_user_data_content is defined
+    - name: Create cloud-init custom userdata file (src file)
+      copy:
+        dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
+        src: "{{ proxmox_vm_from_template_ci_user_data_src_file }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      when:
+        - proxmox_vm_from_template_ci_user_data_src_file is defined
+    - name: Configure cloud-init custom user-data file (with proxmoxer api)
+      proxmox_kvm:
+        api_user: "{{ proxmox_vm_from_template_api_user }}"
+        api_token_id: "{{ proxmox_vm_from_template_api_token_id }}"
+        api_token_secret: "{{ proxmox_vm_from_template_api_token_secret }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        vmid: "{{ proxmox_vm_from_template_dest_id }}"
+        update: yes
+        cicustom: "user={{ proxmox_vm_from_template_ci_user_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Detach cloudinit drive (with qm utility)
+      command: "qm set {{ proxmox_vm_from_template_dest_id }} --ide2 none,media=cdrom"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Attach cloud-init drive (with qm utility)
+      command: "qm set {{ proxmox_vm_from_template_dest_id }} --ide2 {{ proxmox_vm_from_template_storage }}:cloudinit"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+  when:
+    - proxmox_vm_from_template_state == 'present'

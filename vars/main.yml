@@ -1,0 +1,9 @@
+---
+# vars file for coreyramirezgomez.proxmox_vm_from_template
+proxmox_vm_from_template_delegate: "{{ inventory_hostname }}"
+proxmox_vm_from_template_required_packages:
+  - "python3"
+  - "python3-pip"
+proxmox_vm_from_template_required_pip_packages:
+  - "requests"
+  - "proxmoxer"
