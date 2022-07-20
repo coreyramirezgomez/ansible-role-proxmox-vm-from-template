@@ -14,3 +14,26 @@
     - proxmox_vm_from_template_ci_user_data_file_path is defined
     - proxmox_vm_from_template_ci_user_data_file_name is defined
     - proxmox_vm_from_template_ci_user_data_volume is defined
+- block:
+    - name: Start VM (with proxmoxer api)
+      proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_vm_from_template_target_host }}"
+        node: "{{ proxmox_vm_from_template_target_node }}"
+        name: "{{ proxmox_vm_from_template_dest_name }}"
+        vmid: "{{ proxmox_vm_from_template_dest_id }}"
+        state: started
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: Wait for VM startup
+      wait_for_connection:
+        timeout: 60
+      register: waitfor
+    - name: "Debug wait_for results"
+      debug:
+        msg: "wait_for results: {{ waitfor }}"
+        verbosity: 1
+  when:
+    - proxmox_vm_from_template_state == 'present'
+    - proxmox_vm_from_template_startup
