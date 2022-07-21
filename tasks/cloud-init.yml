@@ -34,25 +34,25 @@
         update: yes
         cicustom: "user={{ proxmox_vm_from_template_ci_user_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-    - name: Set fact for cloud-init device
+    - name: Search for existing cloud-init drive
       set_fact:
-        cloudinit_device: |
-          {% set id = proxmox_vm_from_template_storage + ':vm-' + proxmox_vm_from_template_dest_id + '-cloudinit,media=cdrom' %}
+        cloudinit_drive: |
+          {% set id = proxmox_vm_from_template_storage ~ ':vm-' ~ proxmox_vm_from_template_dest_id ~ '-cloudinit,media=cdrom' %}
           {% for k,v in vm_info.items() %}
           {% if id in v %}
           {{ k | trim }}
           {% endif %}
           {% endfor %}
-    - name: Assert cloudinit_device was found and is valid
+    - name: Assert cloud-init drive was found and is valid
       assert:
         that:
-          - cloudinit_device is defined
-          - cloudinit_device != ''
-    - name: Detach cloudinit drive (with qm utility)
-      command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_device }} none,media=cdrom"
+          - cloudinit_drive is defined
+          - cloudinit_drive | default('', true) | trim != ''
+    - name: Detach cloud-init drive (with qm utility)
+      command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} none,media=cdrom"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
     - name: Attach cloud-init drive (with qm utility)
-      command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_device }} {{ proxmox_vm_from_template_storage }}:cloudinit"
+      command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} {{ proxmox_vm_from_template_storage }}:cloudinit"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when:
     - proxmox_vm_from_template_state == 'present'
