@@ -66,10 +66,19 @@ proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
 #     tag: "10"
 
 ### cloud-init handling vars; optional
+# proxmox_vm_from_template_ci_user: "toor"
+# proxmox_vm_from_template_ci_password: "toor"
+# proxmox_vm_from_template_ci_sshkeys: "[public key content here]"
+# proxmox_vm_from_template_ci_nameservers: ""
+# proxmox_vm_from_template_ci_searchdomains: ""
+# proxmox_vm_from_template_ci_type: ""
+proxmox_vm_from_template_ci_ipconfig:
+  ipconfig0: "ip=dhcp,ip6=dhcp"
 # proxmox_vm_from_template_ci_user_data_file_path: "/var/lib/vz/snippets/"
 # proxmox_vm_from_template_ci_user_data_file_name: "{{ inventory_hostname_short }}-user-data"
 # proxmox_vm_from_template_ci_user_data_volume: "local-lvm"
 # proxmox_vm_from_template_ci_user_data_src_file: "files/user-data.txt"
+# See https://github.com/chris2k20/proxmox-cloud-init/blob/main/cloud-init.yml for an example
 # proxmox_vm_from_template_ci_user_data_content: |
 #   #cloud-config
 #   manage_etc_hosts: true

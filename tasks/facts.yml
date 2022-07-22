@@ -11,3 +11,79 @@
   with_items: "{{ proxmox_vm_from_template_update | dict2items }}"
   when:
     - proxmox_vm_from_template_update is defined
+- name: Collect all cloud-init configurations into single fact
+  block:
+    - name: "Include cicustom to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      when:
+        - proxmox_vm_from_template_ci_user_data_volume
+        - proxmox_vm_from_template_ci_user_data_file_name
+      with_items:
+        - {
+            "key": "cicustom",
+            "value": "user={{ proxmox_vm_from_template_ci_user_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_user_data_file_name }}",
+          }
+    - name: "Include ciuser to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - { "key": "ciuser", "value": "{{ proxmox_vm_from_template_ci_user }}" }
+      when: proxmox_vm_from_template_ci_user is defined
+    - name: "Include ciuser to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      when: proxmox_vm_from_template_ci_user is defined
+      with_items:
+        - { "key": "ciuser", "value": "{{ proxmox_vm_from_template_ci_user }}" }
+    - name: "Include cipassword to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - {
+            "key": "cipassword",
+            "value": "{{ proxmox_vm_from_template_ci_password }}",
+          }
+      when: proxmox_vm_from_template_ci_password is defined
+    - name: "Include citype to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - { "key": "citype", "value": "{{ proxmox_vm_from_template_ci_type }}" }
+      when: proxmox_vm_from_template_ci_type is defined
+    - name: "Include sshkeys to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - {
+            "key": "sshkeys",
+            "value": "{{ proxmox_vm_from_template_ci_sshkeys }}",
+          }
+      when: proxmox_vm_from_template_ci_sshkeys is defined
+    - name: "Include nameservers to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - {
+            "key": "nameservers",
+            "value": "{{ proxmox_vm_from_template_ci_nameservers }}",
+          }
+      when: proxmox_vm_from_template_ci_nameservers is defined
+    - name: "Include searchdomains to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - {
+            "key": "searchdomains",
+            "value": "{{ proxmox_vm_from_template_ci_searchdomains }}",
+          }
+      when: proxmox_vm_from_template_ci_searchdomains is defined
+    - name: "Include ipconfig to proxmox_vm_from_template_cloud_init_super_fact"
+      set_fact:
+        proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
+      with_items:
+        - {
+            "key": "ipconfig",
+            "value": "{{ proxmox_vm_from_template_ci_ipconfig }}",
+          }
+      when: proxmox_vm_from_template_ci_ipconfig is defined
