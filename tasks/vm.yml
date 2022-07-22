@@ -13,6 +13,8 @@
         format: "{{ proxmox_vm_from_template_format }}"
         state: "{{ proxmox_vm_from_template_state }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      async: 300
+      poll: 30
     - name: Update VM (with proxmoxer api)
       proxmox_kvm: "{{ proxmox_vm_from_template_update_super_fact }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
@@ -66,7 +68,6 @@
       with_dict: "{{ proxmox_vm_from_template_networks }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when: proxmox_vm_from_template_state == 'present'
-
 - block:
     - name: Stop VM
       proxmox_kvm:
