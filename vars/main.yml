@@ -1,5 +1,5 @@
 ---
-# vars file for coreyramirezgomez.proxmox_vm_from_template
+# vars file for crg.proxmox_vm_from_template
 proxmox_vm_from_template_delegate: "{{ inventory_hostname }}"
 proxmox_vm_from_template_required_packages:
   - "python3"
@@ -8,9 +8,8 @@ proxmox_vm_from_template_required_pip_packages:
   - "requests"
   - "proxmoxer"
 proxmox_vm_from_template_update_super_fact:
-  api_user: "{{ proxmox_api_user }}"
-  api_token_id: "{{ proxmox_api_token_id }}"
-  api_token_secret: "{{ proxmox_api_token_secret }}"
+  api_user: "root@pam"
+  api_password: "{{ proxmox_vm_from_template_root_user_password }}"
   api_host: "{{ proxmox_vm_from_template_target_host }}"
   node: "{{ proxmox_vm_from_template_target_node }}"
   name: "{{ proxmox_vm_from_template_dest_name }}"

@@ -22,13 +22,13 @@ See defaults/main.yml
 Dependencies
 ------------
 
-Sort of assumes you have used my other role: coreyramirezgomez.proxmox_vm_templater - but not entirely required, this should work with any template.
+Sort of assumes you have used my other role: crg.proxmox_vm_templater - but not entirely required, this should work with any template.
 
 Playbook - proxmox_vm_from_template_meta_host: false
 ----------------
     - hosts: proxmox_hosts
       roles:
-        - role: coreyramirezgomez.proxmox_vm_from_template
+        - role: crg.proxmox_vm_from_template
           proxmox_vm_from_template_meta_host: false
           proxmox_vm_from_template_state: "present"
           proxmox_vm_from_template_startup: true 
@@ -83,9 +83,9 @@ Playbook - proxmox_vm_from_template_meta_host: true
     inventories/default
     |-- host_vars
     |   |-- vm-name
-    |   |   |-- coreyramirezgomez.proxmox_vm_from_template.yml
+    |   |   |-- crg.proxmox_vm_from_template.yml
 
-  3. Place all the configuration for the new VM into the file coreyramirezgomez.proxmox_vm_from_template.yml:
+  3. Place all the configuration for the new VM into the file crg.proxmox_vm_from_template.yml:
 
     ---
     proxmox_vm_from_template_meta_host: false
@@ -133,4 +133,4 @@ Playbook - proxmox_vm_from_template_meta_host: true
       become: true
       gather_facts: false # This is required otherwise ansible will try to establish connection to the VM, but we haven't even created it yet. So skip over it.
       roles:
-        - role: coreyramirezgomez.proxmox_vm_from_template
+        - role: crg.proxmox_vm_from_template

@@ -1,5 +1,5 @@
 ---
-# tasks file for coreyramirezgomez.proxmox_vm_from_template
+# tasks file for crg.proxmox_vm_from_template
 - name: Include assertions
   include_tasks: "assertions.yml"
 - name: Include facts tasks
@@ -17,9 +17,9 @@
 - block:
     - name: Start VM (with proxmoxer api)
       proxmox_kvm:
-        api_user: "{{ proxmox_api_user }}"
-        api_token_id: "{{ proxmox_api_token_id }}"
-        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_user: "{{ proxmox_vm_from_template_api_user }}"
+        api_token_id: "{{ proxmox_vm_from_template_api_token_id }}"
+        api_token_secret: "{{ proxmox_vm_from_template_api_token_secret }}"
         api_host: "{{ proxmox_vm_from_template_target_host }}"
         node: "{{ proxmox_vm_from_template_target_node }}"
         name: "{{ proxmox_vm_from_template_dest_name }}"
