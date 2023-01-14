@@ -1,37 +1,38 @@
 ---
 # tasks file for crg.proxmox_vm_from_template
-- name: Include assertions
-  include_tasks: "assertions.yml"
-- name: Include facts tasks
-  include_tasks: "facts.yml"
-- name: Include requirements tasks
-  include_tasks: "requirements.yml"
-- name: Include VM Tasks
-  include_tasks: "vm.yml"
-- name: Include Cloud-Init Tasks
-  include_tasks: "cloud-init.yml"
+- name: "Include assertions"
+  ansible.builtin.include_tasks: "assertions.yml"
+- name: "Include facts tasks"
+  ansible.builtin.include_tasks: "facts.yml"
+- name: "Include requirements tasks"
+  ansible.builtin.include_tasks: "requirements.yml"
+- name: "Include VM Tasks"
+  ansible.builtin.include_tasks: "vm.yml"
+- name: "Include Cloud-Init Tasks"
+  ansible.builtin.include_tasks: "cloud-init.yml"
   when:
     - proxmox_vm_from_template_ci_user_data_file_path is defined
     - proxmox_vm_from_template_ci_user_data_file_name is defined
     - proxmox_vm_from_template_ci_user_data_volume is defined
 - block:
-    - name: Start VM (with proxmoxer api)
-      proxmox_kvm:
-        api_user: "{{ proxmox_vm_from_template_api_user }}"
-        api_token_id: "{{ proxmox_vm_from_template_api_token_id }}"
-        api_token_secret: "{{ proxmox_vm_from_template_api_token_secret }}"
+    - name: "Start VM (with proxmoxer api)"
+      community.general.proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
         api_host: "{{ proxmox_vm_from_template_target_host }}"
         node: "{{ proxmox_vm_from_template_target_node }}"
         name: "{{ proxmox_vm_from_template_dest_name }}"
         vmid: "{{ proxmox_vm_from_template_dest_id }}"
         state: started
+        timeout: "{{ proxmox_vm_from_template_api_timeout }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-    - name: Wait for VM startup
-      wait_for_connection:
+    - name: "Wait for VM startup"
+      ansible.builtin.wait_for_connection:
         timeout: 60
       register: waitfor
     - name: "Debug wait_for results"
-      debug:
+      ansible.builtin.debug:
         msg: "wait_for results: {{ waitfor }}"
         verbosity: 1
   when:

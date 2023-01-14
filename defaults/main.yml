@@ -27,6 +27,9 @@ proxmox_vm_from_template_startup: false
 # Format the template disk should be in: raw, qcow2
 proxmox_vm_from_template_format: "raw"
 
+# override the default timeout of 30 to 60 by default.
+proxmox_vm_from_template_api_timeout: 60
+
 ### API vars; required (with defaults)
 proxmox_vm_from_template_target_host: "{{ inventory_hostname }}"
 proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
@@ -64,6 +67,10 @@ proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
 #     firewall: "0"
 #     macaddr: "70:55:7F:83:2D:B1"
 #     tag: "10"
+# Execute qm commands when API features are unsupported.
+# All commands are prepended with 'qm', so no need to include it in the command.
+# proxmox_vm_from_template_custom_qm_commands:
+#   - set {{ proxmox_vm_from_template_dest_id }} -scsi1 /dev/disk/by-id/ata-really-big-disk
 
 ### cloud-init handling vars; optional
 # proxmox_vm_from_template_ci_user: "toor"

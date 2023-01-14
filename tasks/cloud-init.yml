@@ -1,31 +1,31 @@
-- name: Remove Cloud-Init custom userdata
+- name: "Remove Cloud-Init custom userdata"
   block:
-    - file:
+    - ansible.builtin.file:
         state: absent
         path: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when:
     - proxmox_vm_from_template_state == 'absent'
-- name: Deploy Cloud-Init custom userdata
+- name: "Deploy Cloud-Init custom userdata"
   block:
-    - name: Create cloud-init custom userdata file (inline content)
-      copy:
+    - name: "Create cloud-init custom userdata file (inline content)"
+      ansible.builtin.copy:
         dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
         content: "{{ proxmox_vm_from_template_ci_user_data_content }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when:
         - proxmox_vm_from_template_ci_user_data_content is defined
-    - name: Create cloud-init custom userdata file (src file)
-      copy:
+    - name: "Create cloud-init custom userdata file (src file)"
+      ansible.builtin.copy:
         dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
         src: "{{ proxmox_vm_from_template_ci_user_data_src_file }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when:
         - proxmox_vm_from_template_ci_user_data_src_file is defined
-    - name: Handle cloud-init drive creation or update
+    - name: "Handle cloud-init drive creation or update"
       block:
-        - name: Search for existing cloud-init drive
-          set_fact:
+        - name: "Search for existing cloud-init drive"
+          ansible.builtin.set_fact:
             cloudinit_drive: |
               {% set id = proxmox_vm_from_template_storage ~ ':vm-' ~ proxmox_vm_from_template_dest_id ~ '-cloudinit,media=cdrom' %}
               {% for k,v in vm_info.items() %}
@@ -33,26 +33,26 @@
               {{ k | trim }}
               {% endif %}
               {% endfor %}
-        - name: Assert cloud-init drive was found and is valid
-          assert:
+        - name: "Assert cloud-init drive was found and is valid"
+          ansible.builtin.assert:
             that:
               - cloudinit_drive is defined
               - cloudinit_drive | default('', true) | trim != ''
-        - name: Configure cloud-init options (refresh)
-          proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
+        - name: "Configure cloud-init options (refresh)"
+          community.general.proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-        - name: Detach cloud-init drive (with qm utility)
-          command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} none,media=cdrom"
+        - name: "Detach cloud-init drive (with qm utility)"
+          ansible.builtin.command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} none,media=cdrom"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-        - name: Attach cloud-init drive (with qm utility)
-          command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} {{ proxmox_vm_from_template_storage }}:cloudinit"
+        - name: "Attach cloud-init drive (with qm utility)"
+          ansible.builtin.command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} {{ proxmox_vm_from_template_storage }}:cloudinit"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       rescue:
-        - name: Create and attach cloud-init device (with qm utility)
-          command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ proxmox_vm_from_template_cloudinit_drive_id }} {{ proxmox_vm_from_template_storage }}:cloudinit"
+        - name: "Create and attach cloud-init device (with qm utility)"
+          ansible.builtin.command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ proxmox_vm_from_template_cloudinit_drive_id }} {{ proxmox_vm_from_template_storage }}:cloudinit"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-        - name: Configure cloud-init options (new)
-          proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
+        - name: "Configure cloud-init options (new)"
+          community.general.proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when:
     - proxmox_vm_from_template_state == 'present'

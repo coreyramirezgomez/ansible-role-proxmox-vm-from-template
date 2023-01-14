@@ -1,9 +1,9 @@
 - name: "Set proxmox_vm_from_template_delegate to proxmox host"
-  set_fact:
+  ansible.builtin.set_fact:
     proxmox_vm_from_template_delegate: "{{ proxmox_vm_from_template_target_host }}"
   when: proxmox_vm_from_template_meta_host
 - name: "Construct proxmox_vm_from_template_update_super_fact"
-  set_fact:
+  ansible.builtin.set_fact:
     proxmox_vm_from_template_update_super_fact: |
       {% if item.key not in proxmox_vm_from_template_update_super_fact %}
       {{ proxmox_vm_from_template_update_super_fact | combine({item.key: item.value}) }}
@@ -14,7 +14,7 @@
 - name: Collect all cloud-init configurations into single fact
   block:
     - name: "Include cicustom to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       when:
         - proxmox_vm_from_template_ci_user_data_volume
@@ -25,19 +25,19 @@
             "value": "user={{ proxmox_vm_from_template_ci_user_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_user_data_file_name }}",
           }
     - name: "Include ciuser to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - { "key": "ciuser", "value": "{{ proxmox_vm_from_template_ci_user }}" }
       when: proxmox_vm_from_template_ci_user is defined
     - name: "Include ciuser to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       when: proxmox_vm_from_template_ci_user is defined
       with_items:
         - { "key": "ciuser", "value": "{{ proxmox_vm_from_template_ci_user }}" }
     - name: "Include cipassword to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - {
@@ -46,13 +46,13 @@
           }
       when: proxmox_vm_from_template_ci_password is defined
     - name: "Include citype to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - { "key": "citype", "value": "{{ proxmox_vm_from_template_ci_type }}" }
       when: proxmox_vm_from_template_ci_type is defined
     - name: "Include sshkeys to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - {
@@ -61,7 +61,7 @@
           }
       when: proxmox_vm_from_template_ci_sshkeys is defined
     - name: "Include nameservers to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - {
@@ -70,7 +70,7 @@
           }
       when: proxmox_vm_from_template_ci_nameservers is defined
     - name: "Include searchdomains to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - {
@@ -79,7 +79,7 @@
           }
       when: proxmox_vm_from_template_ci_searchdomains is defined
     - name: "Include ipconfig to proxmox_vm_from_template_cloud_init_super_fact"
-      set_fact:
+      ansible.builtin.set_fact:
         proxmox_vm_from_template_cloud_init_super_fact: "{{ proxmox_vm_from_template_cloud_init_super_fact | combine({item.key: item.value}) }}"
       with_items:
         - {

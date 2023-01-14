@@ -8,13 +8,15 @@ proxmox_vm_from_template_required_pip_packages:
   - "requests"
   - "proxmoxer"
 proxmox_vm_from_template_update_super_fact:
-  api_user: "root@pam"
-  api_password: "{{ proxmox_vm_from_template_root_user_password }}"
+  api_user: "{{ proxmox_api_user }}"
+  api_token_id: "{{ proxmox_api_token_id }}"
+  api_token_secret: "{{ proxmox_api_token_secret }}"
   api_host: "{{ proxmox_vm_from_template_target_host }}"
   node: "{{ proxmox_vm_from_template_target_node }}"
   name: "{{ proxmox_vm_from_template_dest_name }}"
   vmid: "{{ proxmox_vm_from_template_dest_id }}"
   update: true
+  timeout: "{{ proxmox_vm_from_template_api_timeout }}"
 proxmox_vm_from_template_cloud_init_super_fact:
   api_token_id: "{{ proxmox_vm_from_template_api_token_id }}"
   api_user: "{{ proxmox_vm_from_template_api_user }}"
@@ -24,4 +26,5 @@ proxmox_vm_from_template_cloud_init_super_fact:
   name: "{{ proxmox_vm_from_template_dest_name }}"
   vmid: "{{ proxmox_vm_from_template_dest_id }}"
   update: true
+  timeout: "{{ proxmox_vm_from_template_api_timeout }}"
 proxmox_vm_from_template_cloudinit_drive_id: "ide2"

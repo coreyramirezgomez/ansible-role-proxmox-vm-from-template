@@ -1,9 +1,9 @@
 - name: "Assert proxmox_vm_from_template_state = 'present' or 'absent'"
-  assert:
+  ansible.builtin.assert:
     that: proxmox_vm_from_template_state == 'present' or proxmox_vm_from_template_state == 'absent'
     fail_msg: "proxmox_vm_from_template_state only accepts 'present' or 'absent' states"
 - name: "Assert that api_token, api_secret, api_user, target_host, and target_node are defined"
-  assert:
+  ansible.builtin.assert:
     that:
       - proxmox_vm_from_template_api_token_id is defined
       - proxmox_vm_from_template_api_token_secret is defined
@@ -12,7 +12,7 @@
       - proxmox_vm_from_template_target_node is defined
 - block:
     - name: "Assert that dest_id, dest_name, root_password, src_id, src_name and storage is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - proxmox_vm_from_template_dest_id is defined
           - proxmox_vm_from_template_dest_name is defined
@@ -21,17 +21,17 @@
           - proxmox_vm_from_template_src_name is defined
           - proxmox_vm_from_template_storage is defined
     - name: "Assert that only proxmox_vm_from_template_ci_user_data_content is defined"
-      assert:
+      ansible.builtin.assert:
         that: proxmox_vm_from_template_ci_user_data_src_file is not defined
       when: proxmox_vm_from_template_ci_user_data_content is defined
     - name: "Assert that only proxmox_vm_from_template_ci_user_data_src_file is defined"
-      assert:
+      ansible.builtin.assert:
         that: proxmox_vm_from_template_ci_user_data_content is not defined
       when: proxmox_vm_from_template_ci_user_data_src_file is defined
   when: proxmox_vm_from_template_state == 'present'
 - block:
     - name: "Assert that dest_id and dest_name are defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - proxmox_vm_from_template_dest_id is defined
           - proxmox_vm_from_template_dest_name is defined

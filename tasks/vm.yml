@@ -1,6 +1,6 @@
 - block:
-    - name: Create VM From Template (with proxmoxer api)
-      proxmox_kvm:
+    - name: "Create VM From Template (with proxmoxer api)"
+      community.general.proxmox_kvm:
         api_user: "root@pam"
         api_password: "{{ proxmox_vm_from_template_root_user_password }}"
         api_host: "{{ proxmox_vm_from_template_target_host }}"
@@ -12,21 +12,20 @@
         storage: "{{ proxmox_vm_from_template_storage }}"
         format: "{{ proxmox_vm_from_template_format }}"
         state: "{{ proxmox_vm_from_template_state }}"
+        timeout: "{{ proxmox_vm_from_template_api_timeout }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-      async: 300
-      poll: 30
-    - name: Update VM (with proxmoxer api)
-      proxmox_kvm: "{{ proxmox_vm_from_template_update_super_fact }}"
+    - name: "Update VM (with proxmoxer api)"
+      community.general.proxmox_kvm: "{{ proxmox_vm_from_template_update_super_fact }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when: proxmox_vm_from_template_update is defined
-    - name: Gather VM Facts (with qm utility)
+    - name: "Gather VM Facts (with qm utility)"
       block:
         - name: "qm config {{ proxmox_vm_from_template_dest_id }}"
-          command: "qm config {{ proxmox_vm_from_template_dest_id }}"
+          ansible.builtin.command: "qm config {{ proxmox_vm_from_template_dest_id }}"
           register: config
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
         - name: "Construct vm_info fact"
-          set_fact:
+          ansible.builtin.set_fact:
             vm_info: |
               {% set info = {} %}
               {% set lines = config.stdout | split('\n') %}
@@ -37,18 +36,18 @@
               {% endfor %}
               {{ info }}
         - name: "Debug vm_info"
-          debug:
+          ansible.builtin.debug:
             msg: |
               vm_info: {{ vm_info }}
               type: {{ vm_info | type_debug }}
               length: {{ vm_info | length }}
               keys: {{ vm_info.keys() | list }}
             verbosity: 1
-    - name: Increase main disk size (with qm utility)
-      command: "qm resize {{ proxmox_vm_from_template_dest_id }} scsi0 {{ proxmox_vm_from_template_main_disk_size }}"
+    - name: "Increase main disk size (with qm utility)"
+      ansible.builtin.command: "qm resize {{ proxmox_vm_from_template_dest_id }} scsi0 {{ proxmox_vm_from_template_main_disk_size }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-    - name: Update VM storage (with qm utility)
-      command: |
+    - name: "Update VM storage (with qm utility)"
+      ansible.builtin.command: |
         {% if item.key not in vm_info %}
         qm set {{ proxmox_vm_from_template_dest_id }} -{{ item.key }} \
         '{{ item.value.storage }}:{{ item.value.size }}'
@@ -60,17 +59,26 @@
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       register: update_vm_storage
       changed_when: "'already exists. Skipping.' not in update_vm_storage.stdout"
-    - name: Update VM networking (with qm utility)
-      command: |
+    - name: "Update VM networking (with qm utility)"
+      ansible.builtin.command: |
         qm set {{ proxmox_vm_from_template_dest_id }} -{{ item.key }} \
         '{{ item.value.model | default('virtio', true) }},bridge={{ item.value.bridge | default('vmbr0', true) }},firewall={{ item.value.firewall | default('0') }}{% if item.value.macaddr is defined %},macaddr={{ item.value.macaddr }}{% endif %}{% if item.value.tag is defined %},tag={{ item.value.tag }}{% endif %}'
       when: proxmox_vm_from_template_networks is defined
       with_dict: "{{ proxmox_vm_from_template_networks }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - name: "Execute Custom qm commands (with qm utility)"
+      ansible.builtin.command: "qm {{ command }}"
+      with_items: "{{ proxmox_vm_from_template_custom_qm_commands }}"
+      loop_control:
+        loop_var: "command"
+      when:
+        - proxmox_vm_from_template_custom_qm_commands is defined
+        - proxmox_vm_from_template_custom_qm_commands | length > 0
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when: proxmox_vm_from_template_state == 'present'
 - block:
-    - name: Stop VM
-      proxmox_kvm:
+    - name: "Stop VM"
+      community.general.proxmox_kvm:
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
@@ -81,8 +89,8 @@
         state: stopped
         force: true
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-    - name: Delete VM
-      proxmox_kvm:
+    - name: "Delete VM"
+      community.general.proxmox_kvm:
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
