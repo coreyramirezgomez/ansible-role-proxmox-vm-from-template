@@ -72,6 +72,8 @@ proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
 # proxmox_vm_from_template_custom_qm_commands:
 #   - set {{ proxmox_vm_from_template_dest_id }} -scsi1 /dev/disk/by-id/ata-really-big-disk
 
+### cloud-init handling vars; required (with defaults)
+proxmox_vm_from_template_configure_ci: false
 ### cloud-init handling vars; optional
 # proxmox_vm_from_template_ci_user: "toor"
 # proxmox_vm_from_template_ci_password: "toor"
@@ -79,8 +81,9 @@ proxmox_vm_from_template_target_node: "{{ inventory_hostname_short }}"
 # proxmox_vm_from_template_ci_nameservers: ""
 # proxmox_vm_from_template_ci_searchdomains: ""
 # proxmox_vm_from_template_ci_type: ""
-proxmox_vm_from_template_ci_ipconfig:
-  ipconfig0: "ip=dhcp,ip6=dhcp"
+# proxmox_vm_from_template_ci_ipconfig:
+#   ipconfig0: "ip=dhcp,ip6=dhcp"
+
 # proxmox_vm_from_template_ci_user_data_file_path: "/var/lib/vz/snippets/"
 # proxmox_vm_from_template_ci_user_data_file_name: "{{ inventory_hostname_short }}-user-data"
 # proxmox_vm_from_template_ci_user_data_volume: "local-lvm"
@@ -98,3 +101,22 @@ proxmox_vm_from_template_ci_ipconfig:
 #   timezone: UTC
 #   packages:
 #    - qemu-guest-agent
+
+# proxmox_vm_from_template_ci_network_data_file_path: "/var/lib/vz/snippets/"
+# proxmox_vm_from_template_ci_network_data_file_name: "{{ inventory_hostname_short }}-network-data"
+# proxmox_vm_from_template_ci_network_data_volume: "local-lvm"
+# proxmox_vm_from_template_ci_network_data_src_file: "files/network-data.txt"
+# proxmox_vm_from_template_ci_user_data_content: |
+#   version: 1
+#   config:
+#     - type: physical
+#       name: eth0
+#       mac_address: '02:ea:a4:a4:f1:ef'
+#       subnets:
+#       - type: dhcp4
+#     - type: nameserver
+#       address:
+#       - '10.0.0.1'
+#       search:
+#       - 'example.net.'
+

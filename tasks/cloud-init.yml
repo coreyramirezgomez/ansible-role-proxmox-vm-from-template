@@ -4,24 +4,52 @@
         state: absent
         path: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+    - ansible.builtin.file:
+        state: absent
+        path: "{{ proxmox_vm_from_template_ci_network_data_file_path }}/{{ proxmox_vm_from_template_ci_network_data_file_name }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when:
     - proxmox_vm_from_template_state == 'absent'
-- name: "Deploy Cloud-Init custom userdata"
+- name: "Deploy Cloud-Init Configuration"
   block:
-    - name: "Create cloud-init custom userdata file (inline content)"
+    - name: "Create cloud-init custom user-data file (inline content)"
       ansible.builtin.copy:
         dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
         content: "{{ proxmox_vm_from_template_ci_user_data_content }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when:
         - proxmox_vm_from_template_ci_user_data_content is defined
-    - name: "Create cloud-init custom userdata file (src file)"
+    - name: "Create cloud-init custom user-data file (src file)"
       ansible.builtin.copy:
         dest: "{{ proxmox_vm_from_template_ci_user_data_file_path }}/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
         src: "{{ proxmox_vm_from_template_ci_user_data_src_file }}"
       delegate_to: "{{ proxmox_vm_from_template_delegate }}"
       when:
         - proxmox_vm_from_template_ci_user_data_src_file is defined
+    - name: "Update cicustom fact"
+      ansible.builtin.set_fact:
+        proxmox_vm_from_template_cicustom_fact: "user={{ proxmox_vm_from_template_ci_user_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_user_data_file_name }}"
+      when: (proxmox_vm_from_template_ci_user_data_src_file is defined or proxmox_vm_from_template_ci_user_data_content is defined)
+
+    - name: "Create cloud-init custom network-data file (inline content)"
+      ansible.builtin.copy:
+        dest: "{{ proxmox_vm_from_template_ci_network_data_file_path }}/{{ proxmox_vm_from_template_ci_network_data_file_name }}"
+        content: "{{ proxmox_vm_from_template_ci_network_data_content }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      when:
+        - proxmox_vm_from_template_ci_network_data_content is defined
+    - name: "Create cloud-init custom networkdata file (src file)"
+      ansible.builtin.copy:
+        dest: "{{ proxmox_vm_from_template_ci_network_data_file_path }}/{{ proxmox_vm_from_template_ci_network_data_file_name }}"
+        src: "{{ proxmox_vm_from_template_ci_network_data_src_file }}"
+      delegate_to: "{{ proxmox_vm_from_template_delegate }}"
+      when:
+        - proxmox_vm_from_template_ci_network_data_src_file is defined
+    - name: "Update cicustom fact"
+      ansible.builtin.set_fact:
+        proxmox_vm_from_template_cicustom_fact: "{{ proxmox_vm_from_template_cicustom_fact }},network={{ proxmox_vm_from_template_ci_network_data_volume }}:snippets/{{ proxmox_vm_from_template_ci_network_data_file_name }}"
+      when: (proxmox_vm_from_template_ci_network_data_src_file is defined or proxmox_vm_from_template_ci_network_data_content is defined)
+
     - name: "Handle cloud-init drive creation or update"
       block:
         - name: "Search for existing cloud-init drive"
@@ -38,8 +66,8 @@
             that:
               - cloudinit_drive is defined
               - cloudinit_drive | default('', true) | trim != ''
-        - name: "Configure cloud-init options (refresh)"
-          community.general.proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
+        - name: "Configure cloud-init options (refresh) (with qm utility)"
+          command: "qm set {{ proxmox_vm_from_template_dest_id }} --cicustom \"{{ proxmox_vm_from_template_cicustom_fact }}\""
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
         - name: "Detach cloud-init drive (with qm utility)"
           ansible.builtin.command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ cloudinit_drive }} none,media=cdrom"
@@ -51,8 +79,8 @@
         - name: "Create and attach cloud-init device (with qm utility)"
           ansible.builtin.command: "qm set {{ proxmox_vm_from_template_dest_id }} --{{ proxmox_vm_from_template_cloudinit_drive_id }} {{ proxmox_vm_from_template_storage }}:cloudinit"
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
-        - name: "Configure cloud-init options (new)"
-          community.general.proxmox_kvm: "{{ proxmox_vm_from_template_cloud_init_super_fact }}"
+        - name: "Configure cloud-init options (new) (with qm utility)"
+          command: "qm set {{ proxmox_vm_from_template_dest_id }} --cicustom \"{{ proxmox_vm_from_template_cicustom_fact }}\""
           delegate_to: "{{ proxmox_vm_from_template_delegate }}"
   when:
     - proxmox_vm_from_template_state == 'present'

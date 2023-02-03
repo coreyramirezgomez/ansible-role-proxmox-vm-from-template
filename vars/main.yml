@@ -28,3 +28,4 @@ proxmox_vm_from_template_cloud_init_super_fact:
   update: true
   timeout: "{{ proxmox_vm_from_template_api_timeout }}"
 proxmox_vm_from_template_cloudinit_drive_id: "ide2"
+proxmox_vm_from_template_cicustom_fact: ""
